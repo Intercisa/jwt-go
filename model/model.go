@@ -5,6 +5,8 @@ import (
 )
 
 const (
+	TERM_WIDTH_DEFAULT                 = 150
+	DEFAULT_TOKEN_ENV_KEY              = "DEFAULT_OPAQUE"
 	BLANK                              = ""
 	Post                               = "POST"
 	DefaultToken                       = ""
@@ -96,7 +98,7 @@ type TemplatedHeaderJson struct {
 }
 
 func (r *Result) PrintEGJwt() string {
-	return fmt.Sprintf(`JWT=%s`, r.EncodedJwt)
+	return fmt.Sprintf(`EGToken Principal-JWT=%s`, r.EncodedJwt)
 }
 
 func (r *Result) PrintJwtBearer() string {

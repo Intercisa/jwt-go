@@ -1,4 +1,4 @@
-package log
+package print
 
 import (
 	"encoding/json"
@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"bsipiczki.com/jwt-go/model"
-	"bsipiczki.com/jwt-go/terminal"
+	"bsipiczki.com/jwt-go/util"
 	"github.com/atotto/clipboard"
 )
 
@@ -36,7 +36,7 @@ func PrintJWTAndAddToClipboard(jwtResult model.Result, templated bool) {
 		header = headerJson
 	}
 
-	fmt.Println(strings.Repeat(".", terminal.GetTermWidth()))
+	fmt.Println(strings.Repeat(".", util.GetTermWidth()))
 
 	prettyJSON, err := json.MarshalIndent(header, "", "    ")
 	if err != nil {

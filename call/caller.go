@@ -1,141 +1,67 @@
 package call
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"io"
-	"log"
-	"net/http"
-	"strings"
-
 	"bsipiczki.com/jwt-go/model"
+	"github.com/go-zoox/fetch"
 	"github.com/google/uuid"
 )
+
+func call[D interface{}, R interface{}](data *D, result R, header map[string]string, endpoint string) R {
+	var body interface{}
+	if data != nil {
+		body = *data
+	}
+
+	response, err := fetch.Post(endpoint, &fetch.Config{
+		Body:    body,
+		Headers: header,
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
+	response.UnmarshalJSON(&result)
+	return result
+}
 
 func PrincipalTokenCall(opaqueToken string) model.Result {
 	data := model.Payload{
 		OpaqueToken: opaqueToken,
 	}
 
-	payloadBytes, err := json.Marshal(data)
-	if err != nil {
-		log.Fatal(err)
-	}
-	body := bytes.NewReader(payloadBytes)
-
-	req, err := http.NewRequest(model.Post, model.Endpoint, body)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	headerProps := make(map[string]string)
-	headerProps[model.AcceptKey] = model.AcceptValue
-	headerProps[model.ContentTypeKey] = model.ContentTypeValue
-	headerProps[model.TraceIdKey] = uuid.New().String()
-
-	setHeader(req.Header, headerProps)
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer resp.Body.Close()
-
-	bodyBytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		panic(err)
-	}
+	header := make(map[string]string)
+	header[model.AuthorizationKey] = model.AuthorizationBasicValue
+	header[model.CookieKey] = model.CookieValue
 
 	var result model.Result
-	err = json.Unmarshal(bodyBytes, &result)
-	if err != nil {
-		panic(err)
-	}
-
-	return result
+	return call(&data, result, header, model.Endpoint)
 }
 
 func AppJwtCall() model.Result {
-	client := &http.Client{}
-	req, err := http.NewRequest(model.Post, model.AppJwtEndpoint, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	headerProps := make(map[string]string)
-	headerProps[model.AuthorizationKey] = model.AuthorizationBasicValue
-	headerProps[model.CookieKey] = model.CookieValue
-
-	setHeader(req.Header, headerProps)
-
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer resp.Body.Close()
-
-	bodyBytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
+	header := make(map[string]string)
+	header[model.AuthorizationKey] = model.AuthorizationBasicValue
+	header[model.CookieKey] = model.CookieValue
 
 	var result model.Result
-	err = json.Unmarshal(bodyBytes, &result)
-	if err != nil {
-		panic(err)
-	}
-
-	return result
+	var nilData *map[string]interface{}
+	return call(nilData, result, header, model.AppJwtEndpoint)
 }
 
 func OpaqueTokenCall(bearerResult model.Result, partnerAccId string) model.OpaqueResult {
-	client := &http.Client{}
-	defaultData := model.GetData()
-	defaultData.PartnerAccountID = partnerAccId
+	header := make(map[string]string)
+	header[model.ContentTypeKey] = model.ContentTypeValue
+	header[model.AcceptKey] = model.AcceptValue
+	header[model.AuthorizationKey] = bearerResult.PrintJwtBearer()
+	header[model.TraceIdKey] = uuid.New().String()
+	header[model.MessageIdKey] = uuid.New().String()
+	header[model.ParentMessageIdKey] = uuid.New().String()
+	header[model.DeviceUserAgentIdKey] = uuid.New().String()
+	header[model.XDIdKey] = uuid.New().String()
 
-	jsonData, err := json.MarshalIndent(defaultData, "", "  ")
-	if err != nil {
-		fmt.Println("Error marshaling JSON:", err)
-	}
+	data := model.GetData()
+	data.PartnerAccountID = partnerAccId
 
-	req, err := http.NewRequest(model.Post, model.OpaqueEndpoint, strings.NewReader(string(jsonData)))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	headerProps := make(map[string]string)
-	headerProps[model.ContentTypeKey] = model.ContentTypeValue
-	headerProps[model.AcceptKey] = model.AcceptValue
-	headerProps[model.AuthorizationKey] = bearerResult.PrintJwtBearer()
-	headerProps[model.TraceIdKey] = uuid.New().String()
-	headerProps[model.MessageIdKey] = uuid.New().String()
-	headerProps[model.ParentMessageIdKey] = uuid.New().String()
-	headerProps[model.DeviceUserAgentIdKey] = uuid.New().String()
-	headerProps[model.XDIdKey] = uuid.New().String()
-
-	setHeader(req.Header, headerProps)
-
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer resp.Body.Close()
-	bodyBytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
 	var result model.OpaqueResult
-	err = json.Unmarshal(bodyBytes, &result)
-	if err != nil {
-		panic(err)
-	}
-
-	return result
-}
-
-func setHeader(header http.Header, headerProps map[string]string) {
-	for key, value := range headerProps {
-		header.Set(key, value)
-	}
+	return call(&data, result, header, model.OpaqueEndpoint)
 }

@@ -38,8 +38,8 @@ const (
 	ParentMessageIdKey                 = "Parent-Message-ID"
 	DeviceUserAgentIdKey               = "Device-User-Agent-ID"
 	XDIdKey                            = "XD-ID"
-	TravelerAPIEndPoint                = "ecomm-checkout-traveller-api.rcp.us-west-2.checkout.test.exp-aws.net:443"
-	CreateCheckoutSession              = "expediagroup.travelerapi.checkout.CheckoutAPI/CreateCheckoutSession"
+	TravelerAPIEndPoint                = ""
+	CreateCheckoutSession              = ""
 )
 
 type TableInput struct {
@@ -227,34 +227,32 @@ type SearchFilter struct {
 func GetSessionReData(cartId string) GetSessionReq {
 	return GetSessionReq{
 		Context: Context{
-			Locale:   "en_US",
-			Currency: "USD",
+			Locale:   "",
+			Currency: "",
 			DeviceContext: DeviceContext{
-				DeviceUserAgentID: "a143bb33-3a40-4731-b730-674f8d3a91c5",
-				CrossDomainID:     "ad58c8ce-a2ec-41d7-8865-723bc883cef1",
-				IP:                "Hello",
-				UserAgent:         "Hello",
-				DeviceType:        "DESKTOP",
+				DeviceUserAgentID: "",
+				CrossDomainID:     "",
+				IP:                "",
+				UserAgent:         "",
+				DeviceType:        "",
 			},
 			Experiments: []Experiment{
-				{ID: 47688, Bucket: 1},
-				{ID: 46893, Bucket: 1},
-				{ID: 48088, Bucket: 0},
+				{ID: 0, Bucket: 0},
 			},
 			ResourceOwner: ResourceOwner{
-				UserID: "6e3cc17f-bc98-4231-9e8f-3601a6cd739d",
+				UserID: "",
 			},
-			PlatformProductID: "8a1938c7-f88c-4b76-b682-c7f4f2ada5e7",
+			PlatformProductID: "",
 			AdditionalPartnerAccounts: []AdditionalPartnerAccount{
 				{
-					PartnerAccountID:  "a2147247-59a1-4541-8e88-5d055c1b16b7",
-					PlatformProductID: "dac30150-d377-4cf1-ac78-ca226e91c16f",
+					PartnerAccountID:  "",
+					PlatformProductID: "",
 					Type:              0,
 				},
 			},
 			PersonalizationContext: PersonalizationContext{
 				SearchFilters: []SearchFilter{
-					{ProductLine: 0, Urn: "Hello", Explanation: 0},
+					{ProductLine: 0, Urn: "", Explanation: 0},
 				},
 			},
 		},

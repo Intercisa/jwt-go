@@ -4,6 +4,9 @@ use the flag -i for help
 
 ```bash
 Usage of jwt-go:
+ -c string
+        A cartId input for the session call
+
   -o string
         an opaque token input provided by the user (default "")
   -p string
@@ -23,6 +26,9 @@ Usage of jwt-go:
     jwt-go -o _
 
     jwt-go -o _ -t 
+
+    jwt-go -c _ 
+
 ```
 
 example output: 
@@ -45,3 +51,5 @@ symlink jwt-go so can be used everywhere in the terminal
 ```bash
 sudo ln -s "$(pwd)/jwt-go" /usr/local/bin/jwt-go
 ```
+
+after setting the JWT_GO_USE_TABLE env to true the table mode will be the default 

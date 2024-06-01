@@ -7,18 +7,9 @@ import (
 
 	"bsipiczki.com/jwt-go/model"
 	"bsipiczki.com/jwt-go/util"
-	"github.com/atotto/clipboard"
 )
 
-func PrintJWTAndAddToClipboard(jwtResult model.Result, templated bool) {
-	err := clipboard.WriteAll(jwtResult.PrintEGJwt())
-	if err != nil {
-		fmt.Println("Failed to copy to clipboard:", err)
-		return
-	}
-
-	fmt.Println(jwtResult.PrintEGJwt())
-
+func GetJWTJson(jwtResult model.Result, templated bool) []byte {
 	var header interface{}
 
 	headerJson := model.HeaderJson{
@@ -35,10 +26,30 @@ func PrintJWTAndAddToClipboard(jwtResult model.Result, templated bool) {
 	} else {
 		header = headerJson
 	}
+	prettyJSON, err := json.MarshalIndent(header, "", "    ")
+	if err != nil {
+		panic(err)
+	}
+
+	return prettyJSON
+}
+
+func PrintJWTAndAddToClipboard(jwtResult model.Result, templated bool) {
+	util.CopyToClippboard(jwtResult.PrintEGJwt())
+
+	fmt.Println(jwtResult.PrintEGJwt())
+	fmt.Println(strings.Repeat(".", util.GetTermWidth()))
+	prettyJSON := GetJWTJson(jwtResult, templated)
+
+	fmt.Printf("%s\n", prettyJSON)
+}
+
+func PrintSessionResponseAndAddToClipboard(session model.Session) {
+	util.CopyToClippboard(session.CheckoutSession.CheckoutIdentifier.SessionID)
 
 	fmt.Println(strings.Repeat(".", util.GetTermWidth()))
 
-	prettyJSON, err := json.MarshalIndent(header, "", "    ")
+	prettyJSON, err := json.MarshalIndent(session.CheckoutSession.CheckoutIdentifier, "", "    ")
 	if err != nil {
 		panic(err)
 	}
